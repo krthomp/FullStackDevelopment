@@ -1,0 +1,33 @@
+<div class="col-md-4">
+    <h2 class="text-center">Edit Trip</h2>
+    <form *ngIf="editForm" [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Code:</label>
+        <input type="text" formControlName="code"
+          placeholder="Code" class="form-control"
+          [ngClass]="{ 'is-invalid': submitted && f['code'].errors }">
+        <div *ngIf="submitted && f['code'].errors">
+          <div *ngIf="f['code'].errors?.['required']">
+            Trip Code is required
+          </div>
+        </div>
+      </div>
+  
+      <!-- Repeat the structure for other fields -->
+  
+      <div class="form-group">
+        <label>Description:</label>
+        <input type="text" formControlName="description"
+          placeholder="Description" class="form-control"
+          [ngClass]="{ 'is-invalid': submitted && f['description'].errors }">
+        <div *ngIf="submitted && f['description'].errors">
+          <div *ngIf="f['description'].errors?.['required']">
+            Description is required
+          </div>
+        </div>
+      </div>
+  
+      <button type="submit" class="btn btn-info">Save</button>
+    </form>
+  </div>
+  
