@@ -7,10 +7,7 @@ const readLine = require('readline');
 
 // Connect to the database with a timeout
 const connect = () => {
-    setTimeout(() => mongoose.connect(dbURI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    }), 1000);
+    setTimeout(() => mongoose.connect(dbURI, {}), 1000);
 };
 
 // Monitor Mongoose connection events

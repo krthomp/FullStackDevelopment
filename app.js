@@ -11,21 +11,10 @@ var usersRouter = require('./app_server/routes/users');
 var travelRouter = require('./app_server/routes/travel');
 var apiRouter = require('./app_api/routes/index');
 
-var handlebars = require('hbs');
-
 // Connect to the database
 require('./app_api/models/db');
 
 const app = express();
-
-// Enable CORS middleware
-app.use(cors());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  next();
-});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'app_server/views')); // Fixed views path
@@ -40,6 +29,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Enable CORS middleware globally for the Angular app (localhost:4200)
+const corsOptions = {
+  origin: 'http://localhost:4200', // Allow Angular to access Express
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'], // Allowed headers
+};
+app.use(cors(corsOptions));
+
+app.use('/api', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
+// Wire-up routes to controllers
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/travel', travelRouter);

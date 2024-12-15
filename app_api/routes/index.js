@@ -1,17 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const tripController = require('../controllers/trips');
 
-// Define route for trips endpoint
+const tripsController = require('../controllers/trips');
+
 router
     .route('/trips')
-    .get(tripController.tripList) // GET Method for tripList
-    .post(tripController.tripCreate); // POST Method for tripCreate
+    .get(tripsController.tripsList)
+    .post(tripsController.tripAddTrip); // Correctly chained `.post()`
 
-// Define route for a single trip by code
 router
     .route('/trips/:tripCode')
-    .get(tripController.tripsFindByCode)
-    .put(tripController.tripsUpdateTrip); // GET Method for tripDetail
+    .get(tripsController.tripsFindByCode);
 
 module.exports = router;

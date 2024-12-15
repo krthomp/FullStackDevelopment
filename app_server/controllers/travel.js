@@ -1,30 +1,31 @@
-const fetch = require("node-fetch"); // Ensure you have node-fetch installed and required
-
-const tripsEndpoint = 'http://localhost:3000/api/trips';
+const tripsEndpoint = 'https://localhost:3000/api/trips';
 const options = {
     method: 'GET',
     headers: {
         'Accept': 'application/json'
     }
-};
+}
 
-/* GET travel view */
-const travel = async (req, res, next) => {
-    try {
-        const response = await fetch(tripsEndpoint, options); // Await fetch call
-        const trips = await response.json(); // Await JSON parsing
-        // Render the travel view with the fetched trips
-        res.render('travel', { 
-            title: 'Travlr Getaways', 
-            trips 
-        });
-    } catch (err) {
-        console.error('Error fetching trips:', err);
-        res.render('error', { 
-            message: 'Unable to fetch trips', 
-            error: err 
-        });
-    }
+// var fs = require('fs');
+// var trips  = JSON.parse(fs.readFileSync('app_server/controllers/travel.json', 'utf8'));
+
+/* Get travel view */
+const travel = async function (req, res, next) {
+    await fetch(tripsEndpoint, options)
+        .then(res => res.json())
+        .then(json => {
+            let message = null;
+            if(!(json instanceof Array)) {
+                message = "API lokcup error";
+                json = [];
+            } else {
+                if(!json.length){
+                    message = "No trips exist in your database!";
+                }
+            }
+            res.render('travel', {title: 'Travlr Getaways', trips: json, message});
+            })
+            .catch(err => res.status(500).send (e.message));
 };
 
 module.exports = {

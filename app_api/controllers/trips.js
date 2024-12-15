@@ -1,67 +1,60 @@
 const mongoose = require('mongoose');
-const Trip = require('../models/travlr');
-const Model = mongoose.model('Trip');
+const Trip = require('../models/travlr'); // Import the Trip model
 
-const tripList = async (req, res) => {
+const tripsList = async (req, res) => {
     try {
-        const trips = await Model.find({}).exec();
+        const trips = await Trip.find({}).exec();
         if (!trips) {
-            return res.status(404).json({ message: 'No trips found' });
-        } else {
-            return res.status(200).json(trips);
+            return res.status(404).json({ "message": "Trips not found" });
         }
+        res.status(200).json(trips);
     } catch (err) {
-        return res.status(500).json({ message: 'Error retrieving trips', error: err });
+        res.status(500).json({ "message": "Error retrieving trips", "error": err });
     }
 };
 
 const tripsFindByCode = async (req, res) => {
-    const { code } = req.params;
     try {
-        const trip = await Model.findOne({ code: code }).exec();
+        const trip = await Trip.findOne({ 'code': req.params.tripCode }).exec();
         if (!trip) {
-            return res.status(404).json({ message: 'Trip not found' });
+            return res.status(404).json({ "message": "Trip not found" });
         }
-        return res.status(200).json(trip);
+        res.status(200).json(trip);
     } catch (err) {
-        return res.status(500).json({ message: 'Error retrieving trip', error: err });
+        res.status(500).json({ "message": "Error retrieving trip", "error": err });
     }
 };
 
-const tripsAddTrip = async (req, res) => {
+// POST /trips - Add a new trip
+const tripAddTrip = async (req, res) => {
+    const newTrip = new Trip({
+        code: req.body.code,
+        name: req.body.name,
+        length: req.body.length,
+        start: req.body.start,
+        resort: req.body.resort,
+        perPerson: req.body.perPerson,
+        image: req.body.image,
+        description: req.body.description
+    });
+
     try {
-        const newTrip = new Trip({
-            code: req.body.code,
-            name: req.body.name,
-            length: req.body.length,
-            start: req.body.start,
-            resort: req.body.resort,
-            perPerson: req.body.perPerson,
-            image: req.body.image,
-            description: req.body.description
-        });
-
-        const savedTrip = await newTrip.save();
-
-        if (!savedTrip) {
-            return res.status(400).json({ message: 'Failed to add trip' });
-        } else {
-            return res.status(201).json(savedTrip);
-        }
-
+        const q = await newTrip.save();
+        res.status(201).json(q);
     } catch (err) {
-        return res.status(500).json({ message: 'Error adding trip', error: err });
+        res.status(400).json({ "message": "Error adding trip", "error": err });
     }
 };
 
-// PUT: /trips/:tripCode - Updates an existing Trip
+// PUT: /trips/:tripCode - Update an existing trip
 const tripsUpdateTrip = async (req, res) => {
-    console.log(req.params);
-    console.log(req.body);
+    // Uncomment for debugging
+    // console.log(req.params);
+    // console.log(req.body);
 
     try {
-        const updatedTrip = await Model.findOneAndUpdate(
-            { code: req.params.tripCode },
+        const q = await Trip.findOneAndUpdate(
+            { 'code': req.params.tripCode },
             {
                 code: req.body.code,
                 name: req.body.name,
@@ -75,20 +68,19 @@ const tripsUpdateTrip = async (req, res) => {
             { new: true } // Return the updated document
         ).exec();
 
-        if (!updatedTrip) {
-            return res.status(400).json({ message: 'Failed to update trip' });
+        if (!q) {
+            return res.status(400).json({ "message": "Trip not found" });
         } else {
-            return res.status(200).json(updatedTrip);
+            return res.status(200).json(q);
         }
-
     } catch (err) {
-        return res.status(500).json({ message: 'Error updating trip', error: err });
+        return res.status(500).json({ "message": "Error updating trip", "error": err });
     }
 };
 
 module.exports = {
-    tripList,
+    tripsList,
     tripsFindByCode,
-    tripsAddTrip,
-    tripsUpdateTrip
+    tripAddTrip,
+    tripsUpdateTrip // Include the new function in the exports
 };
