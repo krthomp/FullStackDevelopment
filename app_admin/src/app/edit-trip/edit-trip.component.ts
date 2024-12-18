@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { TripDataService } from '../services/trip-data.service';
 import { Trip } from '../models/trip';
@@ -20,20 +20,21 @@ export class EditTripComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
     private tripDataService: TripDataService
   ) {}
 
   ngOnInit(): void {
-    // Retrieve stashed trip ID
-    let tripCode = localStorage.getItem("tripCode");
+    const tripCode = this.route.snapshot.paramMap.get('tripCode');
     if (!tripCode) {
-      alert("Something wrong, couldn’t find where I stashed tripCode!");
+      alert("Something went wrong, couldn’t find where I stashed tripCode!");
       this.router.navigate(['']);
       return;
     }
     console.log('EditTripComponent::ngOnInit');
-    console.log('tripcode:' + tripCode);
+    console.log('tripCode: ' + tripCode);
+
     this.editForm = this.formBuilder.group({
       _id: [],
       code: [tripCode, Validators.required],
@@ -45,41 +46,46 @@ export class EditTripComponent implements OnInit {
       image: ["", Validators.required],
       description: ['', Validators.required]
     });
-    this.tripDataService.getTrip(tripCode)
+
+    this.tripDataService.getTripById(tripCode)
       .subscribe({
-        next: (value: any) => {
+        next: (value: Trip) => {
           this.trip = value;
           // Populate our record into the form
-          this.editForm.patchValue(value[0]);
+          this.editForm.patchValue(value); // Directly patch the object
           if (!value) {
-            this.message = 'No Trip Retrieved!';
-          } else {
-            this.message = 'Trip: ' + tripCode + ' retrieved';
+            alert("Something went wrong, couldn’t find the trip details!");
+            this.router.navigate(['']);
           }
-          console.log(this.message);
         },
-        error: (error: any) => {
-          console.log('Error: ' + error);
+        error: (err) => {
+          console.error('Error fetching trip details:', err);
+          alert("Something went wrong, couldn’t fetch the trip details!");
+          this.router.navigate(['']);
         }
       });
   }
 
-  public onSubmit() {
+  // Getter for easy access to form fields
+  get f() { return this.editForm.controls; }
+
+  public onSubmit(): void {
     this.submitted = true;
     if (this.editForm.valid) {
       this.tripDataService.updateTrip(this.editForm.value)
         .subscribe({
-          next: (value: any) => {
-            console.log(value);
-            this.router.navigate(['']);
+          next: (response) => {
+            console.log('Trip updated successfully:', response);
+            alert('Trip updated successfully!');
+            this.router.navigate(['/trips']);
           },
-          error: (error: any) => {
-            console.log('Error: ' + error);
+          error: (err) => {
+            console.error('Error updating trip:', err);
+            alert("Something went wrong, couldn’t update the trip!");
           }
         });
+    } else {
+      alert('Please fill in all required fields.');
     }
   }
-
-  // get the form short name to access the form fields
-  get f() { return this.editForm.controls; }
 }

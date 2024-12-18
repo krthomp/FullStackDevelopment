@@ -3,16 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
 import { TripDataService } from '../services/trip-data.service';
-
+import { Trip } from '../models/trip';
 
 @Component({
   selector: 'app-add-trip',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './add-trip.component.html',
-  styleUrl: './add-trip.component.css'
+  styleUrls: ['./add-trip.component.css']
 })
-
 export class AddTripComponent implements OnInit {
   addForm!: FormGroup;
   submitted = false;
@@ -37,22 +36,25 @@ export class AddTripComponent implements OnInit {
     });
   }
 
+  // Getter for easy access to form fields
+  get f() { return this.addForm.controls; }
+
   public onSubmit() {
     this.submitted = true;
     if (this.addForm.valid) {
       this.tripService.addTrip(this.addForm.value)
         .subscribe({
-          next: (data: any) => {
+          next: (data: Trip) => {
             console.log(data);
-            this.router.navigate(['']);
+            this.router.navigate(['/trips']);
           },
-          error: (error: any) => {
-            console.log('Error: ' + error);
+          error: (err) => {
+            console.error('Error adding trip:', err);
+            alert("Something went wrong, couldn’t add the trip!");
           }
         });
+    } else {
+      alert('Please fill in all required fields.');
     }
   }
-
-  // get the form short name to access the form fields
-  get f() { return this.addForm.controls; }
 }
